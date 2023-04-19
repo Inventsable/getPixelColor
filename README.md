@@ -72,6 +72,7 @@ getPixelColor(
     [1, 1],
   ],
   {
+    verbose: true,
     onAfterParse: function (result) {
       writeFile(
         Folder.userData + "/results.json",
@@ -120,3 +121,30 @@ getPixelColor(null, {
 ```
 
 > Note the Y values here aren't correct and are inverted. This is due to BMP encoding being linear from left > right and bottom > top. Will fix this soon but running out of time on a weekday.
+
+### Getting every color of the canvas:
+
+```js
+getPixelColor(null, {
+  /* 
+    Since returnColor is true by default, onComplete lifecycle acts similar to onAfterParse with the exception that it processes the results (like removing duplicates and transforming to vanilla colors)
+  */
+  onComplete: function (result) {
+    writeFile(Folder.userData + "/results.json", JSON.stringify(result));
+  },
+});
+```
+
+```js
+[
+  [RGBColor],
+  [RGBColor],
+  [RGBColor],
+  [RGBColor],
+  [RGBColor],
+  [RGBColor],
+  [RGBColor],
+  [RGBColor],
+  [RGBColor],
+];
+```

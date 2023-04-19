@@ -1,3 +1,12 @@
+/**
+ * https://github.com/Inventsable/getPixelColor
+ * Illustrator script to retrieve RGBA values of any PlacedItem regardless of format (PNG, JPG, etc) by parsing raw binary, all from scratch in pure JS
+ *
+ * NOTE: You would typically #include this file to be able to use the getPixelColor function yourself.
+ *
+ * If you're trying to have the script actually run, you'd want to uncomment the bottom lines and add options as needed.
+ */
+
 Object.assign = function (target, varArgs) {
   "use strict";
   if (target == null)
@@ -243,12 +252,12 @@ function getPixelColor(pixels, options) {
     options.onComplete(result);
 }
 
-getPixelColor([[0, 1]], {
-  onAfterParse: function (result) {
-    alert(result);
-    writeFile(
-      "C:/Users/TRSch/OneDrive/Documents/Adobe Scripts/ILST - GetRGBFromBMP/sandbox/result.json",
-      JSON.stringify(result)
-    );
-  },
-});
+// getPixelColor([0, 1], {
+//   onAfterParse: function (result) {
+//     alert(result);
+//     writeFile(
+//       "C:/Users/TRSch/OneDrive/Documents/Adobe Scripts/ILST - GetRGBFromBMP/sandbox/result.json",
+//       JSON.stringify(result)
+//     );
+//   },
+// });
