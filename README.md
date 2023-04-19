@@ -127,7 +127,8 @@ getPixelColor(null, {
 ```js
 getPixelColor(null, {
   /* 
-    Since returnColor is true by default, onComplete lifecycle acts similar to onAfterParse with the exception that it processes the results (like removing duplicates and transforming to vanilla colors)
+    Since returnColor is true by default, onComplete lifecycle acts similar to onAfterParse with the 
+    exception that it processes the results (like removing duplicates and transforming to vanilla colors)
   */
   onComplete: function (result) {
     writeFile(Folder.userData + "/results.json", JSON.stringify(result));
