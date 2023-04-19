@@ -89,7 +89,7 @@ function parseBitmap(binaryData, pixels, options) {
   pixels = pixels || null;
   function hasInvalidCoordinate(list, index, max) {
     var invalid = list.find(function (pixel) {
-      return pixel[index] > max;
+      return pixel[index] >= max;
     });
     return !!invalid;
   }
@@ -101,7 +101,7 @@ function parseBitmap(binaryData, pixels, options) {
       param +
       " coordinate: " +
       list.find(function (pixel) {
-        return pixel[index] > max;
+        return pixel[index] >= max;
       })[index] +
       " is greater than total " +
       params[index] +
