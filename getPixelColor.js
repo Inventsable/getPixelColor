@@ -29,6 +29,11 @@ Array.prototype.findIndex = function (callback) {
     if (callback(this[i], i, this)) return i;
   return null;
 };
+Array.prototype.find = function (callback) {
+  for (var i = 0; i < this.length; i++)
+    if (callback(this[i], i, this)) return this[i];
+  return null;
+};
 Array.prototype.filter = function (callback) {
   var filtered = [];
   for (var i = 0; i < this.length; i++)
@@ -87,29 +92,29 @@ function getBinaryFromTempFile(options) {
 
 function parseBitmap(binaryData, pixels, options) {
   pixels = pixels || null;
-  // function hasInvalidCoordinate(list, index, max) {
-  //   var invalid = list.find(function (pixel) {
-  //     return pixel[index] >= max;
-  //   });
-  //   return !!invalid;
-  // }
-  // function createCoordinateError(list, param, max) {
-  //   var index = param == "X" ? 0 : 1,
-  //     params = ["width", "height"];
-  //   var errString =
-  //     "Invalid " +
-  //     param +
-  //     " coordinate: " +
-  //     list.find(function (pixel) {
-  //       return pixel[index] >= max;
-  //     })[index] +
-  //     " is greater than total " +
-  //     params[index] +
-  //     " of " +
-  //     max +
-  //     ".\r\n\r\nPixelData is 0-based so first pixels have coordinates of 0, not 1.";
-  //   return alert(errString);
-  // }
+  function hasInvalidCoordinate(list, index, max) {
+    var invalid = list.find(function (pixel) {
+      return pixel[index] >= max;
+    });
+    return !!invalid;
+  }
+  function createCoordinateError(list, param, max) {
+    var index = param == "X" ? 0 : 1,
+      params = ["width", "height"];
+    var errString =
+      "Invalid " +
+      param +
+      " coordinate: " +
+      list.find(function (pixel) {
+        return pixel[index] >= max;
+      })[index] +
+      " is greater than total " +
+      params[index] +
+      " of " +
+      max +
+      ".\r\n\r\nPixelData is 0-based so first pixels have coordinates of 0, not 1.";
+    return alert(errString);
+  }
   function getByte(data, index, length) {
     var result = 0;
     for (var i = 0; i < length; i++)
@@ -130,13 +135,13 @@ function parseBitmap(binaryData, pixels, options) {
   if (!isAllPixels) {
     pixels = !Array.isArray(pixels[0]) ? [pixels] : pixels;
     pixelData = new Array(pixels.length);
-    // if (hasInvalidCoordinate(pixels, 0, width)) {
-    //   createCoordinateError(pixels, "X", width);
-    //   return null;
-    // } else if (hasInvalidCoordinate(pixels, 1, height)) {
-    //   createCoordinateError(pixels, "Y", height);
-    //   return null;
-    // }
+    if (hasInvalidCoordinate(pixels, 0, width)) {
+      createCoordinateError(pixels, "X", width);
+      return null;
+    } else if (hasInvalidCoordinate(pixels, 1, height)) {
+      createCoordinateError(pixels, "Y", height);
+      return null;
+    }
     for (var i = 0; i < pixelData.length; i++) {
       var offset =
         (pixels[i][0] +
@@ -169,9 +174,12 @@ function parseBitmap(binaryData, pixels, options) {
         b: binaryData[offset],
         a: binaryData[offset + 3],
         x: i % width,
-        y: Math.floor(i / width),
+        y: Math.abs(Math.floor(i / width) - (height - 1)),
       };
     }
+    pixelData = pixelData.sort(function (a, b) {
+      return a.y == b.y ? a.x - b.x : a.y - b.y;
+    });
     return options.verbose
       ? {
           width: width,
@@ -212,13 +220,13 @@ function getPixelColor(pixels, options) {
         deleteAction: true,
       },
       // Whether to return as native RGBColor or if false, as JSON
-      returnColor: false,
+      // returnColor: false, // NEEDS WORK
       // Whether to return from parsing containing metadata about file such as width and height
       verbose: false,
       // Whether to remove duplicate colors
       removeDuplicates: false,
       // Whether to, if only one color is found, return the color directly instead of a 1-length array
-      flattenResults: false,
+      // flattenResults: false, // NEEDS WORK
     },
     options
   );
@@ -230,6 +238,8 @@ function getPixelColor(pixels, options) {
   if (options.onAfterParse && options.onAfterParse instanceof Function)
     options.onAfterParse(parsed);
   var pixelData = options.verbose ? parsed.pixelData : parsed;
+
+  // Something is wrong beneath here, returning empties onComplete
   var result = options.returnColor
     ? pixelData.map(function (pixel) {
         return new RGBColor().create(pixel.r, pixel.g, pixel.b);
@@ -245,9 +255,24 @@ function getPixelColor(pixels, options) {
       })
     : result;
   result =
-    pixels.length == 1 || (options.flattenResults && result.length == 1)
+    pixels.length == 1
+      ? result[0]
+      : options.flattenResults && result.length == 1
       ? result[0]
       : result;
   if (options.onComplete && options.onComplete instanceof Function)
     options.onComplete(result);
 }
+
+// getPixelColor([1, 1], {
+//   verbose: false,
+//   removeDuplicates: true,
+//   flattenResults: true,
+//   onAfterParse: function (result) {
+//     alert(result);
+//     writeFile(
+//       "C:/Users/TRSch/OneDrive/Documents/Adobe Scripts/ILST - GetRGBFromBMP/sandbox/result.json",
+//       JSON.stringify(result)
+//     );
+//   },
+// });
